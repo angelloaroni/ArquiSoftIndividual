@@ -78,6 +78,3 @@ export function validateProduct(d, products, editingId) {
   if (d.price === '' || !(Number(d.price) > 0)) e.price = 'Debe ser > 0.';
   return e;
 }
-
-// Mide hasta que el navegador pintó (rAF + macrotask) para capturar scripting + render + layout.
-export const afterPaint = (cb) => requestAnimationFrame(() => setTimeout(cb, 0));

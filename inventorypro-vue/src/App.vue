@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { CATEGORIES, PAGE_SIZES, afterPaint, computeMetrics, filterAndSort, generateProducts, nextId, toProduct } from './data.js';
+import { CATEGORIES, PAGE_SIZES, computeMetrics, filterAndSort, generateProducts, nextId, toProduct } from './data.js';
 import BenchBar from './components/BenchBar.vue';
 import Dashboard from './components/Dashboard.vue';
 import ProductTable from './components/ProductTable.vue';
@@ -14,7 +14,6 @@ const page = ref(1);
 const pageSize = ref(50);
 const selected = ref(new Set());
 const editing = ref(null); // null | 'new' | product
-const bench = ref({ render: null, filter: null });
 
 const filtered = computed(() =>
   filterAndSort(products.value, { query: query.value, category: category.value, sortKey: sort.value.key, sortDir: sort.value.dir })
@@ -26,15 +25,12 @@ const rows = computed(() =>
   pageSize.value === 0 ? filtered.value : filtered.value.slice((current.value - 1) * pageSize.value, current.value * pageSize.value)
 );
 
-function measure(key, fn) {
-  const t0 = performance.now();
-  fn();
-  afterPaint(() => (bench.value = { ...bench.value, [key]: performance.now() - t0 }));
-}
-const onQuery = (v) => measure('filter', () => { query.value = v; page.value = 1; });
+const onQuery = (v) => { query.value = v; page.value = 1; };
 function insert(n) {
-  const data = generateProducts(n);
-  measure('render', () => { products.value = data; page.value = 1; selected.value = new Set(); query.value = ''; category.value = ''; });
+  products.value = generateProducts(n); page.value = 1; selected.value = new Set(); query.value = ''; category.value = ''; editing.value = null;
+}
+function clear() {
+  products.value = []; page.value = 1; selected.value = new Set(); query.value = ''; category.value = ''; editing.value = null;
 }
 const toggleSort = (key) => (sort.value = { key, dir: sort.value.key === key && sort.value.dir === 'asc' ? 'desc' : 'asc' });
 function toggleRow(id) {
@@ -67,7 +63,7 @@ function save(draft) {
 <template>
   <div class="app">
     <header class="top"><h1>InventoryPro <span class="fw">Vue 3</span></h1></header>
-    <BenchBar :bench="bench" :total="products.length" :shown="rows.length" @insert="insert" />
+    <BenchBar :total="products.length" :shown="rows.length" @insert="insert" @clear="clear" />
     <Dashboard :metrics="metrics" />
 
     <div class="toolbar">

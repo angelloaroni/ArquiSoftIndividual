@@ -1,5 +1,5 @@
 <script>
-  import { CATEGORIES, PAGE_SIZES, afterPaint, computeMetrics, filterAndSort, generateProducts, nextId, toProduct } from './data.js';
+  import { CATEGORIES, PAGE_SIZES, computeMetrics, filterAndSort, generateProducts, nextId, toProduct } from './data.js';
   import BenchBar from './components/BenchBar.svelte';
   import Dashboard from './components/Dashboard.svelte';
   import ProductTable from './components/ProductTable.svelte';
@@ -13,7 +13,6 @@
   let pageSize = $state(50);
   let selected = $state(new Set());
   let editing = $state(null); // null | 'new' | product
-  let bench = $state({ render: null, filter: null });
 
   const filtered = $derived(filterAndSort(products, { query, category, sortKey: sort.key, sortDir: sort.dir }));
   const metrics = $derived(computeMetrics(products));
@@ -21,15 +20,12 @@
   const current = $derived(Math.min(page, pageCount));
   const rows = $derived(pageSize === 0 ? filtered : filtered.slice((current - 1) * pageSize, current * pageSize));
 
-  function measure(key, fn) {
-    const t0 = performance.now();
-    fn();
-    afterPaint(() => (bench[key] = performance.now() - t0));
-  }
-  const onQuery = (v) => measure('filter', () => { query = v; page = 1; });
+  const onQuery = (v) => { query = v; page = 1; };
   function insert(n) {
-    const data = generateProducts(n);
-    measure('render', () => { products = data; page = 1; selected = new Set(); query = ''; category = ''; });
+    products = generateProducts(n); page = 1; selected = new Set(); query = ''; category = ''; editing = null;
+  }
+  function clear() {
+    products = []; page = 1; selected = new Set(); query = ''; category = ''; editing = null;
   }
   const toggleSort = (key) => (sort = { key, dir: sort.key === key && sort.dir === 'asc' ? 'desc' : 'asc' });
   function toggleRow(id) {
@@ -58,7 +54,7 @@
 
 <div class="app">
   <header class="top"><h1>InventoryPro <span class="fw">Svelte 5</span></h1></header>
-  <BenchBar {bench} total={products.length} shown={rows.length} onInsert={insert} />
+  <BenchBar total={products.length} shown={rows.length} onInsert={insert} onClear={clear} />
   <Dashboard {metrics} />
 
   <div class="toolbar">

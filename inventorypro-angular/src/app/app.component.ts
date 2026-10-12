@@ -1,6 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
 import {
-  CATEGORIES, Draft, PAGE_SIZES, Product, SortKey, afterPaint, computeMetrics, filterAndSort, generateProducts, nextId, toProduct,
+  CATEGORIES, Draft, PAGE_SIZES, Product, SortKey, computeMetrics, filterAndSort, generateProducts, nextId, toProduct,
 } from './data';
 import { BenchBarComponent } from './components/bench-bar.component';
 import { DashboardComponent } from './components/dashboard.component';
@@ -13,7 +13,7 @@ import { ProductFormComponent } from './components/product-form.component';
   template: `
     <div class="app">
       <header class="top"><h1>InventoryPro <span class="fw">Angular 19</span></h1></header>
-      <app-bench-bar [renderMs]="renderMs()" [filterMs]="filterMs()" [total]="products().length" [shown]="rows().length" (insert)="insert($event)" />
+      <app-bench-bar [total]="products().length" [shown]="rows().length" (insert)="insert($event)" (clear)="clear()" />
       <app-dashboard [metrics]="metrics()" />
 
       <div class="toolbar">
@@ -67,8 +67,6 @@ export class AppComponent {
   pageSize = signal(50);
   selected = signal<Set<number>>(new Set());
   editing = signal<Product | 'new' | null>(null);
-  renderMs = signal<number | null>(null);
-  filterMs = signal<number | null>(null);
 
   filtered = computed(() =>
     filterAndSort(this.products(), { query: this.query(), category: this.category(), sortKey: this.sortKey(), sortDir: this.sortDir() })
@@ -81,17 +79,15 @@ export class AppComponent {
     return size === 0 ? this.filtered() : this.filtered().slice((this.current() - 1) * size, this.current() * size);
   });
 
-  private measure(target: typeof this.renderMs, fn: () => void) {
-    const t0 = performance.now();
-    fn();
-    afterPaint(() => target.set(performance.now() - t0));
-  }
-  onQuery(v: string) { this.measure(this.filterMs, () => { this.query.set(v); this.page.set(1); }); }
+  onQuery(v: string) { this.query.set(v); this.page.set(1); }
   insert(n: number) {
-    const data = generateProducts(n);
-    this.measure(this.renderMs, () => {
-      this.products.set(data); this.page.set(1); this.selected.set(new Set()); this.query.set(''); this.category.set('');
-    });
+    this.products.set(generateProducts(n)); this.resetControls();
+  }
+  clear() {
+    this.products.set([]); this.resetControls();
+  }
+  private resetControls() {
+    this.page.set(1); this.selected.set(new Set()); this.query.set(''); this.category.set(''); this.editing.set(null);
   }
   toggleSort(key: SortKey) {
     this.sortDir.set(this.sortKey() === key && this.sortDir() === 'asc' ? 'desc' : 'asc');

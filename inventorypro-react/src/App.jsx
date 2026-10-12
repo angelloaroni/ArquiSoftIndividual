@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { CATEGORIES, PAGE_SIZES, afterPaint, computeMetrics, filterAndSort, generateProducts, nextId, toProduct } from './data.js';
+import { CATEGORIES, PAGE_SIZES, computeMetrics, filterAndSort, generateProducts, nextId, toProduct } from './data.js';
 import BenchBar from './components/BenchBar.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import ProductTable from './components/ProductTable.jsx';
@@ -14,7 +14,6 @@ export default function App() {
   const [pageSize, setPageSize] = useState(50);
   const [selected, setSelected] = useState(() => new Set());
   const [editing, setEditing] = useState(null); // null | 'new' | product
-  const [bench, setBench] = useState({ render: null, filter: null });
 
   const filtered = useMemo(
     () => filterAndSort(products, { query, category, sortKey: sort.key, sortDir: sort.dir }),
@@ -28,16 +27,12 @@ export default function App() {
     [filtered, current, pageSize]
   );
 
-  const measure = (key, fn) => {
-    const t0 = performance.now();
-    fn();
-    afterPaint(() => setBench((b) => ({ ...b, [key]: performance.now() - t0 })));
-  };
-
-  const onQuery = (v) => measure('filter', () => { setQuery(v); setPage(1); });
+  const onQuery = (v) => { setQuery(v); setPage(1); };
   const insert = (n) => {
-    const data = generateProducts(n);
-    measure('render', () => { setProducts(data); setPage(1); setSelected(new Set()); setQuery(''); setCategory(''); });
+    setProducts(generateProducts(n)); setPage(1); setSelected(new Set()); setQuery(''); setCategory(''); setEditing(null);
+  };
+  const clear = () => {
+    setProducts([]); setPage(1); setSelected(new Set()); setQuery(''); setCategory(''); setEditing(null);
   };
   const toggleSort = (key) => setSort((s) => ({ key, dir: s.key === key && s.dir === 'asc' ? 'desc' : 'asc' }));
   const toggleRow = useCallback((id) => setSelected((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; }), []);
@@ -62,7 +57,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="top"><h1>InventoryPro <span className="fw">React 18</span></h1></header>
-      <BenchBar bench={bench} total={products.length} shown={rows.length} onInsert={insert} />
+      <BenchBar total={products.length} shown={rows.length} onInsert={insert} onClear={clear} />
       <Dashboard metrics={metrics} />
 
       <div className="toolbar">
