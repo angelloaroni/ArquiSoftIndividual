@@ -1,0 +1,20 @@
+DIAPOSITIVA 1
+Presento una comparación práctica de cuatro tecnologías frontend. La idea es mantener la misma aplicación y observar cómo cambia su implementación y la respuesta de la interfaz. React se incluye como biblioteca de UI, junto con los otros frameworks. Duración sugerida: 20 segundos.
+
+DIAPOSITIVA 2
+InventoryPro es una aplicación de inventario con dashboard, tabla y formulario. Las cuatro versiones ofrecen las mismas operaciones. Los datos se generan localmente y con semilla fija; no interviene una API ni una base de datos. La imagen corresponde a la versión React. Duración sugerida: 25 segundos.
+
+DIAPOSITIVA 3
+React organiza la UI con componentes y estado. Vue utiliza refs y propiedades calculadas. Angular emplea signals en esta implementación. Svelte usa runes y compila los componentes. Estas diferencias no permiten afirmar por sí solas cuál es más rápido: eso depende del escenario y debe medirse. Duración sugerida: 35 segundos.
+
+DIAPOSITIVA 4
+La metodología evita cambiar varias cosas a la vez. Los datos y las operaciones son equivalentes, aunque el motor reactivo cambia. Usamos producción, el mismo equipo y al menos cinco repeticiones. Limpiar antes de insertar permite comparar el montaje desde cero; insertar dos veces el mismo conjunto puede reutilizar filas existentes. Duración sugerida: 30 segundos.
+
+DIAPOSITIVA 5
+La latencia de una interacción incluye retraso de entrada, procesamiento y presentación hasta el siguiente pintado. El panel de INP muestra una métrica de la sesión y no necesariamente la última interacción. Para comparar cada inserción, grabo Performance y selecciono su clic en Interactions. También reviso Scripting, Rendering, Painting y tareas largas. No se están midiendo tiempos de descarga ni carga inicial. Duración sugerida: 35 segundos.
+
+DIAPOSITIVA 6
+Las pruebas del proyecto confirmaron compilación y operaciones funcionales en las cuatro versiones. Eso no demuestra que un framework tenga mejor rendimiento que otro. La conclusión de rendimiento debe limitarse a los escenarios y al equipo de las mediciones. La paginación reduce las filas montadas y es otro escenario válido para comparar. Duración sugerida: 25 segundos.
+
+DIAPOSITIVA 7
+Paso a la demostración. Primero muestro que las cuatro aplicaciones tienen las mismas funciones. Luego realizo el flujo limpiar e insertar con todas las filas y observo el evento en Performance. Si el tiempo lo permite, repito búsqueda y paginación. Los valores obtenidos en vivo son ilustrativos; para resultados formales uso las medianas de varias repeticiones. Duración sugerida: 15 segundos antes de abrir las aplicaciones.
